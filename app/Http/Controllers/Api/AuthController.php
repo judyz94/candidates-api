@@ -15,11 +15,18 @@ class AuthController extends Controller
     public function generateAccessToken(Request $request): JsonResponse
     {
         $credentials = $request->only(['username', 'password']);
+        $validationResponse = $this->validateRequest($credentials);
+        $userResponse = $this->validateUser($credentials);
 
-        if (($validationResponse = $this->validateRequest($credentials)) || ($userResponse = $this->validateUser($credentials))) {
+        if ($validationResponse || $userResponse) {
             return $validationResponse ?? $userResponse;
         }
 
+        return $this->generateTokenResponse($credentials);
+    }
+
+    private function generateTokenResponse(array $credentials): JsonResponse
+    {
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([

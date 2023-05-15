@@ -13,6 +13,8 @@ class AuthControllerTest extends TestCase
     use RefreshDatabase;
     use WithFaker;
 
+    private const ROUTE = 'api/auth';
+
     public function testGenerateAccessTokenWithValidCredentialsReturnsSuccessfully(): void
     {
         $user = User::factory()->create([
@@ -24,7 +26,7 @@ class AuthControllerTest extends TestCase
             'password' => $password,
         ];
 
-        $response = $this->postJson('api/auth', $request);
+        $response = $this->postJson(self::ROUTE, $request);
 
         $response->assertSuccessful();
         $response->assertJsonStructure([
@@ -53,7 +55,7 @@ class AuthControllerTest extends TestCase
             'password' => 'wrongpassword'
         ];
 
-        $response = $this->postJson('api/auth', $request);
+        $response = $this->postJson(self::ROUTE, $request);
 
         $response->assertStatus(401);
         $response->assertJsonStructure([
@@ -74,7 +76,7 @@ class AuthControllerTest extends TestCase
             'password' => ''
         ];
 
-        $response = $this->postJson('api/auth', $request);
+        $response = $this->postJson(self::ROUTE, $request);
 
         $response->assertStatus(401);
         $response->assertJsonStructure([
@@ -95,7 +97,7 @@ class AuthControllerTest extends TestCase
             'password' => 'password'
         ];
 
-        $response = $this->postJson('api/auth', $request);
+        $response = $this->postJson(self::ROUTE, $request);
 
         $response->assertStatus(404);
         $response->assertJsonStructure([
@@ -129,7 +131,7 @@ class AuthControllerTest extends TestCase
 
         $this->app->instance(AuthController::class, $controller);
 
-        $response = $this->postJson('api/auth', $request);
+        $response = $this->postJson(self::ROUTE, $request);
 
         $response->assertStatus(500);
         $response->assertJson([
