@@ -25,6 +25,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Candidate::class, 'created_by');
     }
 
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
     public function getCandidates(): Collection
     {
         return ($this->role === 'manager') ? Candidate::all() : Candidate::where('owner', $this->id)->get();
@@ -38,7 +43,6 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [
-            'username' => $this->username,
         ];
     }
 }
