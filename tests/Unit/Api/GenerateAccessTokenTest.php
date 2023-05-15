@@ -1,19 +1,21 @@
 <?php
 
+namespace Api;
+
 use App\Http\Controllers\Api\AuthController;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class AuthControllerTest extends TestCase
+class GenerateAccessTokenTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
 
-    private const ROUTE = 'api/auth';
+    private const ROUTE = '/auth';
 
     public function testGenerateAccessTokenWithValidCredentialsReturnsSuccessfully(): void
     {
