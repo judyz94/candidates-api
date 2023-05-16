@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class Candidate extends Model
@@ -35,9 +36,16 @@ class Candidate extends Model
         });
     }
 
+    public static function getCandidatesByOwner(int $ownerId): Collection
+    {
+        return Cache::remember('candidates.owner.' . $ownerId, 3600, function () use ($ownerId) {
+            return static::where('owner', $ownerId)->get();
+        });
+    }
+
     public static function getById(int $id): mixed
     {
-        return Cache::rememberForever('candidate.'.$id, function () use ($id) {
+        return Cache::rememberForever('candidate.'. $id, function () use ($id) {
             return self::findOrFail($id);
         });
     }

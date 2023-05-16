@@ -21,5 +21,6 @@ Route::post('/auth', [AuthController::class, 'generateAccessToken']);
 Route::middleware('jwt.auth')->group(function () {
     Route::post('/lead', [CandidateCreationController::class, 'create']);
     Route::get('/lead/{id}', [CandidateController::class, 'show']);
+    Route::get('/leads', [CandidateController::class, 'showAll']);
 });
 

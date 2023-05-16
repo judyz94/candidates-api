@@ -12,7 +12,65 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CandidateController extends Controller
 {
-    public function show(Request $request, $id): JsonResponse
+    public function show(Request $request, int $candidateId): JsonResponse
+    {
+        $response = $this->validateAndAuthenticate($request, true, $candidateId);
+        if ($response !== null) {
+            return $response;
+        }
+
+        try {
+            $candidate = Candidate::getById($candidateId);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'meta' => [
+                    'success' => false,
+                    'errors' => ['No lead found']
+                ]
+            ], 404);
+        }
+
+        $data = [
+            'id' => $candidate->id,
+            'name' => $candidate->name,
+            'source' => $candidate->source,
+            'owner' => $candidate->owner,
+            'created_at' => $candidate->created_at->format('Y-m-d H:i:s'),
+            'created_by' => $candidate->created_by,
+        ];
+
+        return $this->formatResponse($data);
+    }
+
+    public function showAll(Request $request): JsonResponse
+    {
+        $response = $this->validateAndAuthenticate($request, false);
+        if ($response !== null) {
+            return $response;
+        }
+
+        $user = $request->user();
+        if (!$user->hasRole('manager')) {
+            $candidates = Candidate::getCandidatesByOwner($user->id);
+        } else {
+            $candidates = Candidate::getAll();
+        }
+
+        $data = $candidates->map(function ($candidate) {
+            return [
+                'id' => $candidate->id,
+                'name' => $candidate->name,
+                'source' => $candidate->source,
+                'owner' => $candidate->owner,
+                'created_at' => $candidate->created_at->format('Y-m-d H:i:s'),
+                'created_by' => $candidate->created_by,
+            ];
+        });
+
+        return $this->formatResponse($data);
+    }
+
+    private function validateAndAuthenticate(Request $request, bool $isShow, ?int $candidateId = null): ?JsonResponse
     {
         $user = $request->user();
         $errors = [];
@@ -21,8 +79,10 @@ class CandidateController extends Controller
             $errors[] = 'Token expired';
         }
 
-        if (!$user->hasRole('manager') && !$user->isOwner($id)) {
-            $errors[] = 'Unauthorized';
+        if ($isShow) {
+            if (!$user->hasRole('manager') && !$user->isOwner($candidateId)) {
+                $errors[] = 'Unauthorized';
+            }
         }
 
         if (!empty($errors)) {
@@ -34,30 +94,17 @@ class CandidateController extends Controller
             ], 401);
         }
 
-        try {
-            $candidate = Candidate::getById($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'meta' => [
-                    'success' => false,
-                    'errors' => ['No lead found']
-                ]
-            ], 404);
-        }
+        return null;
+    }
 
+    private function formatResponse(mixed $data): JsonResponse
+    {
         return response()->json([
             'meta' => [
                 'success' => true,
                 'errors' => []
             ],
-            'data' => [
-                'id' => $candidate->id,
-                'name' => $candidate->name,
-                'source' => $candidate->source,
-                'owner' => $candidate->owner,
-                'created_at' => $candidate->created_at->format('Y-m-d H:i:s'),
-                'created_by' => $candidate->created_by,
-            ]
+            'data' => $data
         ], 200);
     }
 

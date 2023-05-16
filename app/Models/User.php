@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -33,11 +32,6 @@ class User extends Authenticatable implements JWTSubject
     public function isOwner(int $candidateId): bool
     {
         return $this->id === Candidate::find($candidateId)->owner;
-    }
-
-    public function getCandidates(): Collection
-    {
-        return ($this->role === 'manager') ? Candidate::all() : Candidate::where('owner', $this->id)->get();
     }
 
     public function getJWTIdentifier(): mixed
