@@ -79,10 +79,8 @@ class CandidateController extends Controller
             $errors[] = 'Token expired';
         }
 
-        if ($isShow) {
-            if (!$user->hasRole('manager') && !$user->isOwner($candidateId)) {
-                $errors[] = 'Unauthorized';
-            }
+        if ($isShow && !$user->hasRole('manager') && !$user->isOwner($candidateId)) {
+            $errors[] = 'Unauthorized';
         }
 
         if (!empty($errors)) {

@@ -53,7 +53,7 @@ class CreateCandidateTest extends TestCase
         $token = JWTAuth::fromUser($user);
 
         $response = $this->postJson(self::ROUTE, [
-            'name' => 'Mi candidato',
+            'name' => 'Maria',
             'source' => 'Fotocasa',
             'owner' => User::factory()->create()->getKey(),
         ], [

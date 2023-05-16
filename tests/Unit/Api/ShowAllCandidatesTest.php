@@ -15,6 +15,7 @@ class ShowAllCandidatesTest extends TestCase
     use WithFaker;
 
     private const ROUTE = '/leads';
+    private const FORMAT = 'Y-m-d H:i:s';
 
     public function testShowAllReturnsCandidatesForManagerSuccessfully(): void
     {
@@ -38,32 +39,7 @@ class ShowAllCandidatesTest extends TestCase
                     'success' => true,
                     'errors' => [],
                 ],
-                'data' => [
-                    [
-                        'id' => $candidate1->id,
-                        'name' => $candidate1->name,
-                        'source' => $candidate1->source,
-                        'owner' => $candidate1->owner,
-                        'created_at' => $candidate1->created_at->format('Y-m-d H:i:s'),
-                        'created_by' => $candidate1->created_by,
-                    ],
-                    [
-                        'id' => $candidate2->id,
-                        'name' => $candidate2->name,
-                        'source' => $candidate2->source,
-                        'owner' => $candidate2->owner,
-                        'created_at' => $candidate2->created_at->format('Y-m-d H:i:s'),
-                        'created_by' => $candidate2->created_by,
-                    ],
-                    [
-                        'id' => $candidate3->id,
-                        'name' => $candidate3->name,
-                        'source' => $candidate3->source,
-                        'owner' => $candidate3->owner,
-                        'created_at' => $candidate3->created_at->format('Y-m-d H:i:s'),
-                        'created_by' => $candidate3->created_by,
-                    ],
-                ],
+                'data' => [$this->getData($candidate1), $this->getData($candidate2), $this->getData($candidate3)]
             ]);
     }
 
@@ -89,24 +65,19 @@ class ShowAllCandidatesTest extends TestCase
                     'success' => true,
                     'errors' => [],
                 ],
-                'data' => [
-                    [
-                        'id' => $candidate1->id,
-                        'name' => $candidate1->name,
-                        'source' => $candidate1->source,
-                        'owner' => $candidate1->owner,
-                        'created_at' => $candidate1->created_at->format('Y-m-d H:i:s'),
-                        'created_by' => $candidate1->created_by,
-                    ],
-                    [
-                        'id' => $candidate2->id,
-                        'name' => $candidate2->name,
-                        'source' => $candidate2->source,
-                        'owner' => $candidate2->owner,
-                        'created_at' => $candidate2->created_at->format('Y-m-d H:i:s'),
-                        'created_by' => $candidate2->created_by,
-                    ],
-                ],
-            ]);
+                'data' => [$this->getData($candidate1), $this->getData($candidate2)]
+        ]);
+    }
+
+    private function getData($candidate): array
+    {
+        return [
+                'id' => $candidate->id,
+                'name' => $candidate->name,
+                'source' => $candidate->source,
+                'owner' => $candidate->owner,
+                'created_at' => $candidate->created_at->format(self::FORMAT),
+                'created_by' => $candidate->created_by,
+        ];
     }
 }
