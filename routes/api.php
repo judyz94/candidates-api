@@ -1,6 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CandidateController;
+use App\Http\Controllers\Api\CandidateCreationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/auth', [AuthController::class, 'generateAccessToken']);
+
+Route::middleware('jwt.auth')->group(function () {
+    Route::post('/lead', [CandidateCreationController::class, 'create']);
+    Route::get('/lead/{id}', [CandidateController::class, 'show']);
+    Route::get('/leads', [CandidateController::class, 'showAll']);
 });
+
