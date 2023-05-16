@@ -30,6 +30,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->role === $role;
     }
 
+    public function isOwner(int $candidateId): bool
+    {
+        return $this->id === Candidate::find($candidateId)->owner;
+    }
+
     public function getCandidates(): Collection
     {
         return ($this->role === 'manager') ? Candidate::all() : Candidate::where('owner', $this->id)->get();

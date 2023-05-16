@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CandidateController;
+use App\Http\Controllers\Api\CandidateCreationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/auth', [AuthController::class, 'generateAccessToken']);
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::post('/lead', [CandidateController::class, 'create']);
+    Route::post('/lead', [CandidateCreationController::class, 'create']);
+    Route::get('/lead/{id}', [CandidateController::class, 'show']);
 });
 

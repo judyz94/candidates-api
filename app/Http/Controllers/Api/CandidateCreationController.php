@@ -3,47 +3,45 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CandidateRequest;
 use App\Models\Candidate;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class CandidateController extends Controller
+class CandidateCreationController extends Controller
 {
-    public function show(Request $request, $id): JsonResponse
+    public function create(CandidateRequest $request): JsonResponse
     {
         $user = $request->user();
-        $errors = [];
+        $token = JWTAuth::parseToken();
 
-        if ($this->isTokenExpired($request)) {
-            $errors[] = 'Token expired';
-        }
-
-        if (!$user->hasRole('manager') && !$user->isOwner($id)) {
-            $errors[] = 'Unauthorized';
-        }
-
-        if (!empty($errors)) {
+        try {
+            $token->check();
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'meta' => [
                     'success' => false,
-                    'errors' => $errors
+                    'errors' => ['Token expired']
                 ]
             ], 401);
         }
 
-        try {
-            $candidate = Candidate::getById($id);
-        } catch (ModelNotFoundException $e) {
+        if (!$user->hasRole('manager')) {
             return response()->json([
                 'meta' => [
                     'success' => false,
-                    'errors' => ['No lead found']
+                    'errors' => ['Unauthorized']
                 ]
-            ], 404);
+            ], 401);
         }
+
+        $candidate = Candidate::create([
+            'name' => $request->input('name'),
+            'source' => $request->input('source'),
+            'owner' => $request->input('owner'),
+            'created_by' => $user->id
+        ]);
 
         return response()->json([
             'meta' => [
@@ -58,19 +56,6 @@ class CandidateController extends Controller
                 'created_at' => $candidate->created_at->format('Y-m-d H:i:s'),
                 'created_by' => $candidate->created_by,
             ]
-        ], 200);
-    }
-
-    public function isTokenExpired(Request $request): bool
-    {
-        $token = $request->bearerToken();
-
-        try {
-            JWTAuth::setToken($token)->authenticate();
-        } catch (TokenExpiredException $e) {
-            return true;
-        }
-
-        return false;
+        ], 201);
     }
 }
